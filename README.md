@@ -13,14 +13,15 @@ Entry for the [make.fun bounty "Make the Judge Laugh in One Line"](https://make.
 > The barista misspelled my name so badly on my cup that I legally changed it to match.
 
 The line is written by hand for this bounty. It starts from a
-universally recognised annoyance (a coffee cup with your name spelled
-wrong) and escalates it one step past sense: instead of correcting
-the cup, the speaker corrects their legal identity to match the cup.
+universally recognised annoyance — a coffee cup with your name
+spelled wrong — and escalates it one step past sense: instead of
+correcting the cup, the speaker corrects their legal identity to
+match the cup.
 The punchline lands because the surrender is total and delivered
-completely straight — no explanation, no wink, just a person who lost
+completely straight — no explanation, no wink, just someone who lost
 an argument with a paper cup. The topic is deliberately human and
 everyday rather than another AI-agent joke, so it stands apart from
-the field.
+the field. The entry is deterministic: the same line on every run.
 
 ## Run
 

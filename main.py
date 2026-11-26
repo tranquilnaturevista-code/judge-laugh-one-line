@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Make the Judge Laugh in One Line — entry program.
+"""One-line comedy entry for the make.fun bounty
+"Make the Judge Laugh in One Line".
 
-Writes one original funny line to /output/entry.txt (or
-$OUTPUT_DIR/entry.txt). The line is fixed and hand-written for this
-bounty; the program checks it against the competition gate before
-writing: UTF-8 text of 1-200 characters, not only whitespace, a single
-line.
+The program writes a single hand-written funny line to
+/output/entry.txt (or $OUTPUT_DIR/entry.txt). Before writing it
+checks the line against the competition gate: UTF-8 text, 1-200
+characters, not only whitespace, and a single line (no newline).
 """
 
 import argparse
@@ -17,23 +17,33 @@ LINE = (
     "that I legally changed it to match."
 )
 
+MIN_CHARS = 1
+MAX_CHARS = 200
 
-def check_gate(text):
-    """Return a list of gate failures; empty means the entry is valid."""
+
+def validate_entry(text):
+    """Check `text` against the gate; return a list of problems (empty = valid)."""
     problems = []
     if not text.strip():
         problems.append("entry is blank")
-    # Gate is in characters (1-200), not bytes: a line with non-ASCII
-    # characters can be <= 200 characters yet > 200 UTF-8 bytes, and
-    # must still pass.
-    size = len(text)
-    if not 1 <= size <= 200:
+    # The gate counts characters, not bytes: a line with non-ASCII
+    # characters may be within 200 characters yet over 200 UTF-8
+    # bytes, and it still has to pass.
+    if not MIN_CHARS <= len(text) <= MAX_CHARS:
         problems.append(
-            "entry is %d characters, gate needs 1-200" % size
+            f"entry is {len(text)} characters, gate needs 1-200"
         )
     if "\n" in text or "\r" in text:
         problems.append("entry must be a single line")
     return problems
+
+
+def fail(problems, where=""):
+    """Print each problem to stderr and exit non-zero."""
+    prefix = f"gate failure{where}: " if where else "gate failure: "
+    for problem in problems:
+        print(prefix + problem, file=sys.stderr)
+    sys.exit(1)
 
 
 def main(argv=None):
@@ -47,16 +57,14 @@ def main(argv=None):
     )
     args = parser.parse_args(argv)
 
-    problems = check_gate(LINE)
+    problems = validate_entry(LINE)
     if problems:
-        for problem in problems:
-            print("gate failure: " + problem, file=sys.stderr)
-        sys.exit(1)
+        fail(problems)
 
     if args.dry_run:
-        # Validate without touching the disk, so the entry can be
-        # tested in environments where /output is not writable.
-        print("gate ok: %d characters" % len(LINE))
+        # Only validate, without touching the disk, so the entry can
+        # be tested where /output is not writable.
+        print(f"gate ok: {len(LINE)} characters")
         print(LINE)
         return
 
@@ -71,17 +79,15 @@ def main(argv=None):
     if written != LINE:
         print("entry mismatch after write", file=sys.stderr)
         sys.exit(1)
-    # Re-check the gate against what actually landed on disk, so a
-    # write that silently changed the text can never pass quietly.
-    problems = check_gate(written)
+    # Check the gate again against what actually landed on disk, so
+    # a write that silently changed the text can never pass quietly.
+    problems = validate_entry(written)
     if problems:
-        for problem in problems:
-            print("gate failure on disk: " + problem, file=sys.stderr)
-        sys.exit(1)
+        fail(problems, where=" on disk")
 
     print(
-        "Wrote entry.txt: %d characters (%d bytes)"
-        % (len(written), len(written.encode("utf-8")))
+        f"Wrote entry.txt: {len(written)} characters "
+        f"({len(written.encode('utf-8'))} bytes)"
     )
 
 
